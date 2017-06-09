@@ -26,6 +26,18 @@ typedef NS_ENUM(NSInteger,SSStateType) {
     SSStateTypeConsume,
     /** 交易成功 **/
     SSStateTypeTransactionSuccess,
+    /** 冲正当前交易 **/
+    SSStateTypeCurrentRequestReversal,
+    /** 退还 **/
+    SSStateTypeRefund,
+    /** 交换 **/
+    SSStateTypeTransfer,
+    /** 撤回 **/
+    SSStateTypeRevocation,
+    /** 任意状态 **/
+    SSStateTypeAny,
+    /** 停止交易 **/
+    SSStateTypeStopTransaction,
 };
 
 //条件枚举
@@ -44,6 +56,20 @@ typedef NS_ENUM(NSInteger,SSEventType) {
     SSEventTypeConsume,
     /** 交易返回成功 **/
     SSEventTypeResponseSuccess,
+    /** 执行当前请求冲正 **/
+    SSEventTypeCurrentRequestReversal,
+    /** 执行退还 **/
+    SSEventTypeRefund,
+    /** 执行转换 **/
+    SSEventTypeTransfer,
+    /** 执行撤回 **/
+    SSEventTypeRevocation,
+    /** 报告返回 **/
+    SSEventTypeResponseReport,
+    /** 取消交易 **/
+    SSEventTypeCancelTransaction,
+    /** 获取Pin密码 **/
+    SSEventTypeGetEncryptionPin,
 };
 
 /** 状态枚举转换成字符串 **/
@@ -122,4 +148,39 @@ typedef NS_ENUM(NSInteger,SSEventType) {
  *  交易返回成功
  */
 - (BOOL)SSEventTypeResponseSuccess;
+
+/**
+ *  执行当前请求冲正
+ */
+- (BOOL)SSEventTypeCurrentRequestReversal;
+
+/**
+ *  执行退还
+ */
+- (BOOL)SSEventTypeRefund;
+
+/**
+ *  执行转换
+ */
+- (BOOL)SSEventTypeTransfer;
+
+/**
+ *  执行撤回
+ */
+- (BOOL)SSEventTypeRevocation;
+
+/**
+ *  报告返回
+ */
+- (BOOL)SSEventTypeResponseReport;
+
+/**
+ *  取消交易
+ */
+- (BOOL)SSEventTypeCancelTransaction;
+
+/**
+ *  获取Pin密码
+ */
+- (BOOL)SSEventTypeGetEncryptionPin;
 @end

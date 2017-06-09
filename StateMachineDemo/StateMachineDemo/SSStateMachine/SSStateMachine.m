@@ -18,6 +18,12 @@ static NSString *const kSSStateTypeReversalComplete = @"SSStateTypeReversalCompl
 static NSString *const kSSStateTypeSwipeCard = @"SSStateTypeSwipeCard";
 static NSString *const kSSStateTypeConsume = @"SSStateTypeConsume";
 static NSString *const kSSStateTypeTransactionSuccess = @"SSStateTypeTransactionSuccess";
+static NSString *const kSSStateTypeCurrentRequestReversal = @"SSStateTypeCurrentRequestReversal";
+static NSString *const kSSStateTypeRefund = @"SSStateTypeRefund";
+static NSString *const kSSStateTypeTransfer = @"SSStateTypeTransfer";
+static NSString *const kSSStateTypeRevocation = @"SSStateTypeRevocation";
+static NSString *const kSSStateTypeAny = @"SSStateTypeAny";
+static NSString *const kSSStateTypeStopTransaction = @"SSStateTypeStopTransaction";
 
 //Event
 static NSString *const kSSEventTypeInit = @"SSEventTypeInit";
@@ -27,6 +33,13 @@ static NSString *const kSSEventTypeNeedReversal = @"SSEventTypeNeedReversal";
 static NSString *const kSSEventTypeSwipeCard = @"SSEventTypeSwipeCard";
 static NSString *const kSSEventTypeConsume = @"SSEventTypeConsume";
 static NSString *const kSSEventTypeResponseSuccess = @"SSEventTypeResponseSuccess";
+static NSString *const kSSEventTypeCurrentRequestReversal = @"SSEventTypeCurrentRequestReversal";
+static NSString *const kSSEventTypeRefund = @"SSEventTypeRefund";
+static NSString *const kSSEventTypeTransfer = @"SSEventTypeTransfer";
+static NSString *const kSSEventTypeRevocation = @"SSEventTypeRevocation";
+static NSString *const kSSEventTypeResponseReport = @"SSEventTypeResponseReport";
+static NSString *const kSSEventTypeCancelTransaction = @"SSEventTypeCancelTransaction";
+static NSString *const kSSEventTypeGetEncryptionPin = @"SSEventTypeGetEncryptionPin";
 
 @implementation SSStateMachine
 
@@ -43,6 +56,12 @@ STATE_MACHINE(^(LSStateMachine * sm) {
     [sm addState:STATE_TYPE_STRING(SSStateTypeSwipeCard)];
     [sm addState:STATE_TYPE_STRING(SSStateTypeConsume)];
     [sm addState:STATE_TYPE_STRING(SSStateTypeTransactionSuccess)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeCurrentRequestReversal)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeRefund)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeTransfer)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeRevocation)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeAny)];
+    [sm addState:STATE_TYPE_STRING(SSStateTypeStopTransaction)];
     
     //逻辑
     [sm when:EVENT_TYPE_STRING(SSEventTypeInit)
@@ -76,6 +95,50 @@ transitionFrom:STATE_TYPE_STRING(SSStateTypeSwipeCard)
     [sm when:EVENT_TYPE_STRING(SSEventTypeResponseSuccess)
 transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
           to:STATE_TYPE_STRING(SSStateTypeTransactionSuccess)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeCurrentRequestReversal)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
+          to:STATE_TYPE_STRING(SSStateTypeCurrentRequestReversal)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeRefund)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeSwipeCard)
+          to:STATE_TYPE_STRING(SSStateTypeRefund)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeResponseSuccess)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeRefund)
+          to:STATE_TYPE_STRING(SSStateTypeTransactionSuccess)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeTransfer)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeSwipeCard)
+          to:STATE_TYPE_STRING(SSStateTypeTransfer)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeResponseSuccess)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeTransfer)
+          to:STATE_TYPE_STRING(SSStateTypeTransactionSuccess)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeRevocation)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeSwipeCard)
+          to:STATE_TYPE_STRING(SSStateTypeRevocation)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeResponseSuccess)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeRevocation)
+          to:STATE_TYPE_STRING(SSStateTypeTransactionSuccess)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeCurrentRequestReversal)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeRevocation)
+          to:STATE_TYPE_STRING(SSStateTypeCurrentRequestReversal)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeResponseReport)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeAny)
+          to:STATE_TYPE_STRING(SSStateTypeStopTransaction)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeCancelTransaction)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeAny)
+          to:STATE_TYPE_STRING(SSStateTypeStopTransaction)
+     ];
+    [sm when:EVENT_TYPE_STRING(SSEventTypeGetEncryptionPin)
+transitionFrom:STATE_TYPE_STRING(SSStateTypeSwipeCard)
+          to:STATE_TYPE_STRING(SSStateTypeSwipeCard)
      ];
 });
 
@@ -116,6 +179,21 @@ transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
         case SSStateTypeTransactionSuccess:
             result = kSSStateTypeTransactionSuccess;
             break;
+        case SSStateTypeCurrentRequestReversal:
+            result = kSSStateTypeCurrentRequestReversal;
+            break;
+        case SSStateTypeRefund:
+            result = kSSStateTypeRefund;
+            break;
+        case SSStateTypeRevocation:
+            result = kSSStateTypeRevocation;
+            break;
+        case SSStateTypeAny:
+            result = kSSStateTypeAny;
+            break;
+        case SSStateTypeStopTransaction:
+            result = kSSStateTypeStopTransaction;
+            break;
         default:
             break;
     }
@@ -150,6 +228,21 @@ transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
     else if ([stateType isEqualToString:kSSStateTypeTransactionSuccess]) {
         stateTypeEnum = SSStateTypeTransactionSuccess;
     }
+    else if ([stateType isEqualToString:kSSStateTypeCurrentRequestReversal]) {
+        stateTypeEnum = SSStateTypeCurrentRequestReversal;
+    }
+    else if ([stateType isEqualToString:kSSStateTypeRefund]) {
+        stateTypeEnum = SSStateTypeRefund;
+    }
+    else if ([stateType isEqualToString:kSSStateTypeRevocation]) {
+        stateTypeEnum = SSStateTypeRevocation;
+    }
+    else if ([stateType isEqualToString:kSSStateTypeAny]) {
+        stateTypeEnum = SSStateTypeAny;
+    }
+    else if ([stateType isEqualToString:kSSStateTypeStopTransaction]) {
+        stateTypeEnum = SSStateTypeStopTransaction;
+    }
     return stateTypeEnum;
 }
 
@@ -177,6 +270,27 @@ transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
             break;
         case SSEventTypeResponseSuccess:
             result = kSSEventTypeResponseSuccess;
+            break;
+        case SSEventTypeCurrentRequestReversal:
+            result = kSSEventTypeCurrentRequestReversal;
+            break;
+        case SSEventTypeRefund:
+            result = kSSEventTypeRefund;
+            break;
+        case SSEventTypeTransfer:
+            result = kSSEventTypeTransfer;
+            break;
+        case SSEventTypeRevocation:
+            result = kSSEventTypeRevocation;
+            break;
+        case SSEventTypeResponseReport:
+            result = kSSEventTypeResponseReport;
+            break;
+        case SSEventTypeCancelTransaction:
+            result = kSSEventTypeCancelTransaction;
+            break;
+        case SSEventTypeGetEncryptionPin:
+            result = kSSEventTypeGetEncryptionPin;
             break;
         default:
             break;
@@ -208,6 +322,27 @@ transitionFrom:STATE_TYPE_STRING(SSStateTypeConsume)
             break;
         case SSEventTypeResponseSuccess:
             result = [self SSEventTypeResponseSuccess];
+            break;
+        case SSEventTypeCurrentRequestReversal:
+            result = [self SSEventTypeCurrentRequestReversal];
+            break;
+        case SSEventTypeRefund:
+            result = [self SSEventTypeRefund];
+            break;
+        case SSEventTypeTransfer:
+            result = [self SSEventTypeTransfer];
+            break;
+        case SSEventTypeRevocation:
+            result = [self SSEventTypeRevocation];
+            break;
+        case SSEventTypeResponseReport:
+            result = [self SSEventTypeResponseReport];
+            break;
+        case SSEventTypeCancelTransaction:
+            result = [self SSEventTypeCancelTransaction];
+            break;
+        case SSEventTypeGetEncryptionPin:
+            result = [self SSEventTypeGetEncryptionPin];
             break;
         default:
             break;

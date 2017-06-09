@@ -9,11 +9,29 @@
 #import "ViewController.h"
 #import "SSStateMachineModel.h"
 
+typedef NS_ENUM(NSInteger,TransactionType) {
+    /** 消费 **/
+    TransactionTypeConsume,
+    /** 退还 **/
+    TransactionTypeRefund,
+    /** 交换 **/
+    TransactionTypeTransfer,
+    /** 撤回 **/
+    TransactionTypeRevocation
+};
+
 @interface ViewController () <SSStateMachineModelDelegate>
 /** 状态机Model **/
 @property (nonatomic, strong) SSStateMachineModel *SMModel;
 /** 是否需要冲正 **/
 @property (nonatomic, assign) BOOL isNeedReversal;
+/** 交易返回是否成功 **/
+@property (nonatomic, assign) BOOL isTransactionSuccess;
+/** 交易方式 **/
+@property (nonatomic, assign) TransactionType transType;
+/** 需要APP端输入密码 **/
+@property (nonatomic, assign) BOOL isNeedPin;
+@property (nonatomic, assign) BOOL pinSuccess;
 @end
 
 @implementation ViewController
@@ -25,9 +43,17 @@
     
     [self.SMModel setDelegate:self];
     
-    [self.SMModel performEventWithEventType:SSEventTypeInit];
-    
+    //是否需要冲正
     _isNeedReversal = NO;
+    //交易返回是否成功
+    _isTransactionSuccess = YES;
+    //交易方式
+    _transType = TransactionTypeConsume;
+    //需要APP端输入密码
+    _isNeedPin = YES;
+    _pinSuccess = NO;
+    
+    [self.SMModel performEventWithEventType:SSEventTypeInit];
 }
 
 - (void)stateMachineModel:(SSStateMachineModel *)stateMachineModel ChangeFromState:(SSStateType)currentStateType toState:(SSStateType)nextStateType {
@@ -54,10 +80,90 @@
             [self.SMModel performEventWithEventType:SSEventTypeSwipeCard];
             break;
         case SSStateTypeSwipeCard:
-            [self.SMModel performEventWithEventType:SSEventTypeConsume];
+            if (_isNeedPin) {
+                if (_pinSuccess) {
+                    //消费
+                    if (_transType == TransactionTypeConsume) {
+                        NSLog(@"开始消费");
+                        [self.SMModel performEventWithEventType:SSEventTypeConsume];
+                    }
+                    //退还
+                    else if (_transType == TransactionTypeRefund) {
+                        NSLog(@"开始退还");
+                        [self.SMModel performEventWithEventType:SSEventTypeRefund];
+                    }
+                    //交换
+                    else if (_transType == TransactionTypeTransfer) {
+                        NSLog(@"开始交换");
+                        [self.SMModel performEventWithEventType:SSEventTypeTransfer];
+                    }
+                    //撤回
+                    else if (_transType == TransactionTypeRevocation) {
+                        [self.SMModel performEventWithEventType:SSEventTypeRevocation];
+                    }
+                } else {
+                    NSLog(@"开始手动输入密码");
+                    _pinSuccess = YES;
+                    NSLog(@"密码输入成功");
+                    [self.SMModel performEventWithEventType:SSEventTypeGetEncryptionPin];
+                }
+            } else{
+                //消费
+                if (_transType == TransactionTypeConsume) {
+                    NSLog(@"开始消费");
+                    [self.SMModel performEventWithEventType:SSEventTypeConsume];
+                }
+                //退还
+                else if (_transType == TransactionTypeRefund) {
+                    NSLog(@"开始退还");
+                    [self.SMModel performEventWithEventType:SSEventTypeRefund];
+                }
+                //交换
+                else if (_transType == TransactionTypeTransfer) {
+                    NSLog(@"开始交换");
+                    [self.SMModel performEventWithEventType:SSEventTypeTransfer];
+                }
+                //撤回
+                else if (_transType == TransactionTypeRevocation) {
+                    [self.SMModel performEventWithEventType:SSEventTypeRevocation];
+                }
+            }
             break;
         case SSStateTypeConsume:
-            [self.SMModel performEventWithEventType:SSEventTypeResponseSuccess];
+            //交易成功
+            if (_isTransactionSuccess ==YES) {
+                [self.SMModel performEventWithEventType:SSEventTypeResponseSuccess];
+            }
+            //交易失败
+            else {
+                [self.SMModel performEventWithEventType:SSEventTypeCurrentRequestReversal];
+            }
+            break;
+        case SSStateTypeTransactionSuccess:
+            NSLog(@"交易成功");
+            break;
+        case SSStateTypeCurrentRequestReversal:
+            NSLog(@"冲正交易");
+            break;
+        case SSStateTypeRefund:
+            //退还交易不需要冲正
+            if (_isTransactionSuccess) {
+                [self.SMModel performEventWithEventType:SSEventTypeResponseSuccess];
+            }
+            //退还交易失败
+            else {
+                NSLog(@"退还交易失败");
+            }
+            break;
+        case SSStateTypeTransfer:
+            //交换交易不需要冲正
+            if (_isTransactionSuccess) {
+                [self.SMModel performEventWithEventType:SSEventTypeResponseSuccess];
+            }
+            //交换交易失败
+            else {
+                NSLog(@"交换交易失败");
+            }
             break;
         default:
             break;
