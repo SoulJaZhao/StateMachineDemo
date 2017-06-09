@@ -7,13 +7,13 @@
 //
 
 #import "ViewController.h"
+#import "SSStateMachineModel.h"
 
-#import "SSStateMachine.h"
-
-static NSString *const kKeyPath = @"state";
-
-@interface ViewController ()
-@property (nonatomic, strong) SSStateMachine *stateMachine;
+@interface ViewController () <SSStateMachineModelDelegate>
+/** 状态机Model **/
+@property (nonatomic, strong) SSStateMachineModel *SMModel;
+/** 是否需要冲正 **/
+@property (nonatomic, assign) BOOL isNeedReversal;
 @end
 
 @implementation ViewController
@@ -21,17 +21,50 @@ static NSString *const kKeyPath = @"state";
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    self.stateMachine = [[SSStateMachine alloc] init];
-    [self.stateMachine addObserver:self forKeyPath:kKeyPath options:NSKeyValueObservingOptionNew context:nil];
-    [self.stateMachine performEventWithEventType:SSEventTypeInit];
+    self.SMModel = [[SSStateMachineModel alloc] init];
     
+    [self.SMModel setDelegate:self];
+    
+    [self.SMModel performEventWithEventType:SSEventTypeInit];
+    
+    _isNeedReversal = NO;
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
-    if ([keyPath isEqualToString:kKeyPath]) {
-        NSLog(@"%@",change);
+- (void)stateMachineModel:(SSStateMachineModel *)stateMachineModel ChangeFromState:(SSStateType)currentStateType toState:(SSStateType)nextStateType {
+    NSLog(@"%ld-%ld",(SSStateType)currentStateType,(SSStateType)nextStateType);
+    //根据当前状态执行触发事件
+    switch (nextStateType) {
+        case SSStateTypeCheckPayParameters:
+            [self.SMModel performEventWithEventType:SSEventTypeCheckDeviceId];
+            break;
+        case SSStateTypeCheckDeviceId:
+            [self.SMModel performEventWithEventType:SSEventTypeCheckDeviceComplete];
+            break;
+        case SSStateTypeCheckIfNeedReversal:
+            //需要冲正
+            if (_isNeedReversal) {
+                [self.SMModel performEventWithEventType:SSEventTypeNeedReversal];
+            }
+            //不需要冲正
+            else {
+                [self.SMModel performEventWithEventType:SSEventTypeSwipeCard];
+            }
+            break;
+        case SSStateTypeReversalComplete:
+            [self.SMModel performEventWithEventType:SSEventTypeSwipeCard];
+            break;
+        case SSStateTypeSwipeCard:
+            [self.SMModel performEventWithEventType:SSEventTypeConsume];
+            break;
+        case SSStateTypeConsume:
+            [self.SMModel performEventWithEventType:SSEventTypeResponseSuccess];
+            break;
+        default:
+            break;
     }
 }
+
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

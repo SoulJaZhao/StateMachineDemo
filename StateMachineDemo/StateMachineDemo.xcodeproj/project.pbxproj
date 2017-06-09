@@ -14,6 +14,7 @@
 		9611422A1EE9544300DA5A81 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 961142291EE9544300DA5A81 /* Assets.xcassets */; };
 		9611422D1EE9544300DA5A81 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9611422B1EE9544300DA5A81 /* LaunchScreen.storyboard */; };
 		961142371EE9550A00DA5A81 /* SSStateMachine.m in Sources */ = {isa = PBXBuildFile; fileRef = 961142361EE9550A00DA5A81 /* SSStateMachine.m */; };
+		963765881EEA2F260019BD07 /* SSStateMachineModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 963765871EEA2F260019BD07 /* SSStateMachineModel.m */; };
 		AF04921004F88663329CACFE /* libPods-StateMachineDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 619CCEF8421D2D5B70460CEE /* libPods-StateMachineDemo.a */; };
 /* End PBXBuildFile section */
 
@@ -33,6 +34,8 @@
 		9611422E1EE9544300DA5A81 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		961142351EE9550A00DA5A81 /* SSStateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSStateMachine.h; sourceTree = "<group>"; };
 		961142361EE9550A00DA5A81 /* SSStateMachine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSStateMachine.m; sourceTree = "<group>"; };
+		963765861EEA2F260019BD07 /* SSStateMachineModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSStateMachineModel.h; sourceTree = "<group>"; };
+		963765871EEA2F260019BD07 /* SSStateMachineModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSStateMachineModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +115,8 @@
 			children = (
 				961142351EE9550A00DA5A81 /* SSStateMachine.h */,
 				961142361EE9550A00DA5A81 /* SSStateMachine.m */,
+				963765861EEA2F260019BD07 /* SSStateMachineModel.h */,
+				963765871EEA2F260019BD07 /* SSStateMachineModel.m */,
 			);
 			path = SSStateMachine;
 			sourceTree = "<group>";
@@ -239,6 +244,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				961142251EE9544300DA5A81 /* ViewController.m in Sources */,
+				963765881EEA2F260019BD07 /* SSStateMachineModel.m in Sources */,
 				961142221EE9544300DA5A81 /* AppDelegate.m in Sources */,
 				9611421F1EE9544300DA5A81 /* main.m in Sources */,
 				961142371EE9550A00DA5A81 /* SSStateMachine.m in Sources */,
